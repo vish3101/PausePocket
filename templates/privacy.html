@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy — Pause Pocket{% endblock %}
+
+{% block head %}
+<style>
+    .terms-section {
+        padding: 5rem 2rem 6rem;
+        max-width: 760px;
+        margin: 0 auto;
+    }
+
+    .terms-eyebrow {
+        display: inline-block;
+        background: var(--accent-light);
+        color: var(--accent);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        margin-bottom: 1.25rem;
+    }
+
+    .terms-title {
+        font-family: var(--font-display);
+        font-size: clamp(2rem, 4vw, 3rem);
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        color: var(--ink);
+        margin-bottom: 0.5rem;
+    }
+
+    .terms-updated {
+        font-size: 0.85rem;
+        color: var(--ink-faint);
+        margin-bottom: 3rem;
+    }
+
+    .terms-card {
+        background: var(--paper-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 2.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .terms-block {
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border-soft);
+    }
+
+    .terms-block:last-child {
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .terms-block h2 {
+        font-family: var(--font-display);
+        font-size: 1.2rem;
+        color: var(--ink);
+        margin-bottom: 0.75rem;
+    }
+
+    .terms-block p {
+        font-size: 0.95rem;
+        color: var(--ink-muted);
+        line-height: 1.75;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="terms-section">
+    <span class="terms-eyebrow">Legal</span>
+    <h1 class="terms-title">Privacy Policy</h1>
+    <p class="terms-updated">Last updated: April 29, 2026</p>
+
+    <div class="terms-card">
+
+        <div class="terms-block">
+            <h2>1. Data We Collect</h2>
+            <p>When you create an account, we collect your name and email address. When you use the app, we collect the expense records you enter, including amounts, categories, dates, and any descriptions you provide. We do not collect payment information or financial account credentials of any kind.</p>
+        </div>
+
+        <div class="terms-block">
+            <h2>2. How We Use Your Data</h2>
+            <p>Your data is used solely to provide the Pause Pocket service — storing your expenses, generating summaries, and displaying your spending history. We do not use your data for advertising, profiling, or any purpose beyond operating the application for your benefit.</p>
+        </div>
+
+        <div class="terms-block">
+            <h2>3. Data Storage</h2>
+            <p>Your account information and expense records are stored securely on our servers. We take reasonable technical and organisational measures to protect your data from unauthorised access, loss, or disclosure. Passwords are stored in hashed form and are never readable by us.</p>
+        </div>
+
+        <div class="terms-block">
+            <h2>4. Third-Party Services</h2>
+            <p>Pause Pocket does not sell, rent, or share your personal data with third parties. We may use essential infrastructure services (such as hosting providers) to operate the application, but these parties are bound by confidentiality obligations and are not permitted to use your data for any other purpose.</p>
+        </div>
+
+        <div class="terms-block">
+            <h2>5. Data Retention and Deletion</h2>
+            <p>We retain your data for as long as your account is active. You may request deletion of your account and all associated data at any time. Upon deletion, your records will be permanently removed from our systems within 30 days.</p>
+        </div>
+
+        <div class="terms-block">
+            <h2>6. Contact Us</h2>
+            <p>If you have any questions or concerns about this Privacy Policy or how your data is handled, please reach out to us through the app. We are committed to addressing your concerns promptly and transparently.</p>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
