@@ -1,5 +1,4 @@
 import sqlite3
-from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from database.db import get_db, init_db, seed_db
@@ -67,7 +66,8 @@ def login():
 
     session["user_id"] = user["id"]
     session["user_name"] = user["name"]
-    return redirect(url_for("expenses"))
+    session["user_email"] = email
+    return redirect(url_for("profile"))
 
 
 # ------------------------------------------------------------------ #
@@ -95,16 +95,41 @@ def profile():
     if not session.get("user_id"):
         return redirect(url_for("login"))
 
-    with get_db() as conn:
-        user = conn.execute(
-            "SELECT name, email, created_at FROM users WHERE id = ?",
-            (session["user_id"],)
-        ).fetchone()
+    raw_name = session.get("user_name", "User")
+    parts = raw_name.split()
+    initials = parts[0][0].upper() + (parts[-1][0].upper() if len(parts) > 1 else "")
 
-    dt = datetime.strptime(user["created_at"][:10], "%Y-%m-%d")
-    joined = f"{dt.strftime('%B')} {dt.day}, {dt.year}"
+    user = {
+        "name": raw_name,
+        "initials": initials,
+        "email": session.get("user_email", ""),
+        "joined": "January 12, 2025",
+    }
 
-    return render_template("profile.html", name=user["name"], email=user["email"], joined=joined)
+    stats = {
+        "total_spent": "₹24,580",
+        "transaction_count": 47,
+        "top_category": "Food",
+    }
+
+    transactions = [
+        {"date": "May 2, 2025", "description": "Swiggy dinner order", "category": "Food", "amount": "₹540"},
+        {"date": "Apr 29, 2025", "description": "Metro card recharge", "category": "Travel", "amount": "₹200"},
+        {"date": "Apr 27, 2025", "description": "Amazon — earbuds", "category": "Shopping", "amount": "₹1,299"},
+        {"date": "Apr 25, 2025", "description": "Electricity bill", "category": "Bills", "amount": "₹1,840"},
+        {"date": "Apr 22, 2025", "description": "BookMyShow — movie", "category": "Entertainment", "amount": "₹450"},
+    ]
+
+    categories = [
+        {"name": "Food", "amount": "₹8,240", "percent": 34},
+        {"name": "Shopping", "amount": "₹6,580", "percent": 27},
+        {"name": "Bills", "amount": "₹5,320", "percent": 22},
+        {"name": "Travel", "amount": "₹2,740", "percent": 11},
+        {"name": "Entertainment", "amount": "₹1,700", "percent": 7},
+    ]
+
+    return render_template("profile.html", user=user, stats=stats,
+                           transactions=transactions, categories=categories)
 
 
 @app.route("/expenses")
