@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from database.db import get_db, init_db, seed_db
@@ -91,7 +92,19 @@ def logout():
 
 @app.route("/profile")
 def profile():
-    return "Profile page — coming in Step 4"
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    with get_db() as conn:
+        user = conn.execute(
+            "SELECT name, email, created_at FROM users WHERE id = ?",
+            (session["user_id"],)
+        ).fetchone()
+
+    dt = datetime.strptime(user["created_at"][:10], "%Y-%m-%d")
+    joined = f"{dt.strftime('%B')} {dt.day}, {dt.year}"
+
+    return render_template("profile.html", name=user["name"], email=user["email"], joined=joined)
 
 
 @app.route("/expenses")
