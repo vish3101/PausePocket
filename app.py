@@ -1,11 +1,56 @@
 import sqlite3
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from database.db import get_db, init_db, seed_db
 
 app = Flask(__name__)
 app.secret_key = "dev-secret-change-in-prod"
+
+
+def _resolve_date_filter(args) -> tuple[str, str, str, str]:
+    today = date.today()
+    # No default: None means "no period param" so bare from/to can still reach the custom check.
+    period = args.get("period")
+
+    # Named presets are checked first so clicking a preset button always wins,
+    # even if stale from/to values are still present in the submitted form.
+    if period == "this_month":
+        df = today.replace(day=1)
+        return df.isoformat(), today.isoformat(), period, today.strftime("%B %Y")
+
+    if period == "last_month":
+        first_of_this = today.replace(day=1)
+        last_of_prev = first_of_this - timedelta(days=1)
+        df = last_of_prev.replace(day=1)
+        return df.isoformat(), last_of_prev.isoformat(), period, last_of_prev.strftime("%B %Y")
+
+    if period == "last_3_months":
+        df = today - timedelta(days=90)
+        label = f"{fmt_date(df.isoformat())} – {fmt_date(today.isoformat())}"
+        return df.isoformat(), today.isoformat(), period, label
+
+    if period == "last_6_months":
+        df = today - timedelta(days=180)
+        label = f"{fmt_date(df.isoformat())} – {fmt_date(today.isoformat())}"
+        return df.isoformat(), today.isoformat(), period, label
+
+    if period == "all_time":
+        return "0001-01-01", today.isoformat(), "all_time", "All Time"
+
+    # No named preset matched — try custom from/to (submitted by the Apply button).
+    custom_from = args.get("from", "").strip()
+    custom_to = args.get("to", "").strip()
+    if custom_from and custom_to:
+        try:
+            df = date.fromisoformat(custom_from)
+            dt = date.fromisoformat(custom_to)
+            label = f"{fmt_date(df.isoformat())} – {fmt_date(dt.isoformat())}"
+            return df.isoformat(), dt.isoformat(), "custom", label
+        except ValueError:
+            pass
+
+    return "0001-01-01", today.isoformat(), "all_time", "All Time"
 
 
 def fmt_amount(amount: float) -> str:
@@ -105,15 +150,17 @@ def profile():
     if not session.get("user_id"):
         return redirect(url_for("login"))
 
+    date_from, date_to, period, active_period = _resolve_date_filter(request.args)
     user_id = session["user_id"]
+
     with get_db() as conn:
         row = conn.execute(
             "SELECT name, email, created_at FROM users WHERE id = ?", (user_id,)
         ).fetchone()
         expense_rows = conn.execute(
             "SELECT amount, category, date, description FROM expenses "
-            "WHERE user_id = ? ORDER BY date DESC",
-            (user_id,),
+            "WHERE user_id = ? AND date BETWEEN ? AND ? ORDER BY date DESC",
+            (user_id, date_from, date_to),
         ).fetchall()
 
     parts = row["name"].split()
@@ -158,8 +205,11 @@ def profile():
         for name, amount in sorted(category_totals.items(), key=lambda x: x[1], reverse=True)
     ]
 
-    return render_template("profile.html", user=user, stats=stats,
-                           transactions=transactions, categories=categories)
+    return render_template(
+        "profile.html",
+        user=user, stats=stats, transactions=transactions, categories=categories,
+        period=period, date_from=date_from, date_to=date_to, active_period=active_period,
+    )
 
 
 @app.route("/expenses")

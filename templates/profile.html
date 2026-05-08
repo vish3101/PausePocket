@@ -22,6 +22,33 @@
         <a href="{{ url_for('logout') }}" class="btn-ghost">Sign out</a>
     </div>
 
+    <!-- Date filter bar -->
+    <div class="filter-bar">
+        <form method="GET" action="{{ url_for('profile') }}" class="filter-form">
+            <div class="filter-presets">
+                <button type="submit" name="period" value="this_month"
+                        class="filter-btn{% if period == 'this_month' %} filter-btn-active{% endif %}">This Month</button>
+                <button type="submit" name="period" value="last_month"
+                        class="filter-btn{% if period == 'last_month' %} filter-btn-active{% endif %}">Last Month</button>
+                <button type="submit" name="period" value="last_3_months"
+                        class="filter-btn{% if period == 'last_3_months' %} filter-btn-active{% endif %}">Last 3 Months</button>
+                <button type="submit" name="period" value="last_6_months"
+                        class="filter-btn{% if period == 'last_6_months' %} filter-btn-active{% endif %}">Last 6 Months</button>
+                <button type="submit" name="period" value="all_time"
+                        class="filter-btn{% if period == 'all_time' %} filter-btn-active{% endif %}">All Time</button>
+            </div>
+            <div class="filter-custom">
+                <input type="date" name="from" class="form-input filter-date"
+                       value="{{ date_from if period == 'custom' else '' }}">
+                <span class="filter-sep">to</span>
+                <input type="date" name="to" class="form-input filter-date"
+                       value="{{ date_to if period == 'custom' else '' }}">
+                <button type="submit" name="period" value="custom" class="btn-ghost filter-apply">Apply</button>
+            </div>
+        </form>
+        <p class="filter-showing">Showing: <strong>{{ active_period }}</strong></p>
+    </div>
+
     <!-- Summary stats -->
     <div class="profile-stats">
         <div class="stat-card">
@@ -74,6 +101,10 @@
                             </td>
                             <td class="txn-amount">{{ txn.amount }}</td>
                         </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="empty-note">No transactions in this period.</td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -96,6 +127,8 @@
                         <div class="cat-bar" style="--cat-pct: {{ cat.percent }}%"></div>
                     </div>
                 </div>
+                {% else %}
+                <p class="empty-note">No expenses in this period.</p>
                 {% endfor %}
             </div>
         </section>
